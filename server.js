@@ -15,7 +15,7 @@ function requestHandler(req, res) {
 	var filepath =  (req.url == '/' ? 'index.html' : '.' +req.url) ,
 	fileext = path.extname(filepath); 
 	console.log("Request for " + filepath+ " received.");
-	
+
 	fs.exists(filepath, function (f) {
 		console.log(f);
 		if (f) {
@@ -92,6 +92,10 @@ io.sockets.on('connection',
 			socket.broadcast.emit('image',data);
 		});
 		
+		socket.on('flowData',function(data){
+			console.log("Received: 'flowData' ");
+			console.log(data);
+		})
 		
 		socket.on('disconnect', function() {
 			console.log("Client has disconnected");
