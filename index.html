@@ -1,0 +1,85 @@
+<html>
+	<head>
+		<script type="text/javascript" src="js/oflow.js"> </script> 
+		<script type="text/javascript" src="js/colors.js"> </script> 
+		<script src="socket.io/socket.io.js"> </script>
+		
+		<script type="text/javascript">
+			//var socket = io.connect('http://ec2-54-221-90-69.compute-1.amazonaws.com:8080/');
+			var socket = io.connect('http://localhost:8080/');
+			socket.on('connect', function() {
+				console.log("Connected");
+			});
+
+			socket.on('image', function (data) {
+                                console.log("Got image");
+				document.getElementById('imagefile').src = data;
+                        });
+			
+
+			
+		function main() {
+					 
+        	var zoneSize = 4,
+            videoElement = document.getElementById('thevideo'),
+            videoWidth = videoElement.videoWidth,
+            videoHeight = videoElement.videoHeight;
+            webCamFlow = new oflow.WebCamFlow(videoElement, zoneSize),
+            canvas = document.getElementById('scene'),
+            ballCanvas = document.getElementById('ballScene'),
+            sceneCtx = canvas.getContext('2d'),
+            ballCtx = ballCanvas.getContext('2d'),
+            sceneWidth = canvas.width,
+            sceneHeight = canvas.height,
+            ballSceneW = ballScene.width,
+            ballSceneH = ballScene.height,
+            ballX = ballSceneW / 2,
+            ballY = ballSceneH / 2;
+
+        	ballCtx.fillStyle = '#bada55';
+
+        	webCamFlow.onCalculated( function (direciton) {
+            // render zones
+            sceneCtx.clearRect(0, 0, sceneWidth, sceneHeight);
+            for(var i = 0; i < direciton.zones.length; ++i) {
+                var zone = direciton.zones[i];
+                sceneCtx.strokeStyle = getDirectionalColor(zone.u, zone.v);
+                sceneCtx.beginPath();
+                sceneCtx.moveTo(zone.x,zone.y);
+                sceneCtx.lineTo((zone.x - zone.u), zone.y + zone.v);
+                sceneCtx.stroke();
+                // console.log(zone);
+            }
+
+            // render ball:
+            ballCtx.clearRect(0, 0, ballSceneW, ballSceneH);
+            ballCtx.beginPath();
+            ballX -= direciton.u * 5;
+            ballY += direciton.v * 5;
+            if (ballX < 0) { ballX = 0; }
+            if (ballX > ballSceneW) { ballX = ballSceneW; }
+            if (ballY < 0) { ballY = 0; }
+            if (ballY > ballSceneH) { ballY = ballSceneH; }
+            ballCtx.arc(ballX, ballY, 10, 0, 2 * Math.PI, false);
+            ballCtx.fillStyle = 'yellow';
+            ballCtx.fill();
+            ballCtx.stroke(); 
+        });
+
+        webCamFlow.startCapture();
+    }	
+		
+		</script>
+	</head>
+	<body onload="main();">
+		<img src="" id="imagefile">
+		<div style='float:left'>
+        	Video: <video id="thevideo" width="320" height="240" autoplay></video>
+			Canvas: <canvas id="ballScene" width="320" height="240"></canvas>
+    	</div>
+    	<canvas id='scene' width='640px' height='480px'></canvas>
+			
+		
+	</body>
+</html>
+
