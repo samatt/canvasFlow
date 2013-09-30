@@ -33,9 +33,12 @@
             }
 
 
+            function calculateAlphaMag(zone){
+                return Math.sqrt(zone.u*zone.u +zone.v*zone.v)
+            }
             function main() {
 
-             var zoneSize = 16    ,
+             var zoneSize = 8    ,
              videoElement = document.getElementById('thevideo'),
              videoWidth = videoElement.videoWidth,
              videoHeight = videoElement.videoHeight,
@@ -66,12 +69,62 @@
             for(var i = 0; i < direciton.zones.length; ++i) {
                 var zone = direciton.zones[i];
                 sceneCtx.strokeStyle = getDirectionalColor(zone.u, zone.v);
-                sceneCtx.beginPath();
-                sceneCtx.moveTo(zone.x,zone.y);
-                sceneCtx.lineTo((zone.x - zone.u), zone.y + zone.v);
-                sceneCtx.stroke();
+                // console.log(getDirectionalColor(zone.u, zone.v));
+                // sceneCtx.beginPath();
+                // sceneCtx.moveTo(zone.x,zone.y);
+                // sceneCtx.lineTo((zone.x - zone.u), zone.y + zone.v);
+                // sceneCtx.stroke();
+
+                 var mag = calculateAlphaMag(direciton.zones[i]);
+                // console.log(mag);
+                var imageData = maskCtx.getImageData(direciton.zones[i].x, direciton.zones[i].y, 16, 16);
+                var data = imageData.data;
+                // console.log(zone.x + //zone.y);
+                var color = getDirectionalColor(direciton.zones[i].u, direciton.zones[i].v);
+                for(var j = 0, n = data.length; j < n; j += 4) {
+                
+                // console.log("first : " + j);
+                // var green = map_range(mag,0,20,0,255);
+                // var red =  255-map_range(mag,0,20,10,data[j]+50);//map_range(mag,0,30,0,255);
+                var green =  255 -map_range(mag,0,20,10,data[j+1]+50);
+                // var blue = 255-map_range(mag,0,20,10,data[j+2]+50);
+                // console.log(map_range(mag,0,15,10,data[j+3]);//" "+data[j+3] +" "+ mag);
+                // var alpha =255-map_range(mag,0,20,10,data[j+3]);//data[j+3];
+                // data[j] = red; 
+                data[j+1] = green;   
+                // data[j+2] = blue;
+                // data[j+3] = alpha; 
+                // data[j] = color[0]; 
+                // data[j+1] = color[1];   
+                // data[j+2] = color[2];
+                // data[j+3] = color[3]; 
+                // console.log(j);
+                
+                // data[\+2] = blue; 
+                // data[index+3] = alpha; 
+                
+                
+
+                }
+                imageData.data = data;
+                maskCtx.putImageData(imageData,zone.x , zone.y);
+                
+                // maskCtx.clearRect(0, 0, maskSceneW, maskSceneH);
+                // maskCtx.beginPath();
+                // maskCtx.arc(zone.x,zone.y,5,0,2 * Math.PI, false);
+                // maskCtx.fillStyle = "blue";//getDirectionalColor(zone.u, zone.v);
+                // maskCtx.fill();
+                // maskCtx.stroke();
+                // maskCtx.endPath();
                 
             }
+
+            // for(var i = 0; i < direciton.zones.length; ++i) {
+            //     var zone = direciton.zones[i];
+                
+  
+                
+            // }
 
             // render ball:
             ballCtx.clearRect(0, 0, ballSceneW, ballSceneH);
@@ -87,24 +140,26 @@
             ballCtx.fill();
             ballCtx.stroke(); 
 
+            // console.log(webCamFlow.getWidth() + webCamFlow.getHeight());
 
+          //   var imageData = maskCtx.getImageData(0, 0, maskSceneW, maskSceneH);
+          //   var data = imageData.data;
 
-            var imageData = maskCtx.getImageData(0, 0, maskSceneW, maskSceneH);
-            var data = imageData.data;
+          //   // iterate over all pixels
+          //   for(var i = 0, n = data.length; i < n; i += 4) {
+          //     var red = 255 - data[i];
+          //     var green = 255- data[i + 1];
+          //     var blue = 255- data[i + 2];
+          //     var alpha = 255- data[i + 3];
 
-        // iterate over all pixels
-        for(var i = 0, n = data.length; i < n; i += 4) {
-          var red = 255 - data[i];
-          var green = 255- data[i + 1];
-          var blue = 255- data[i + 2];
-          var alpha = data[i + 3];
-
-          data[i] = red;
-          data[i+1] = green; 
-      }
-      imageData.data = data;
-      maskCtx.putImageData(imageData,0,   0);
-        // maskCtx.drawImage(imageData,10,10);
+          //     data[i] = red;
+          //     data[i+1] = green;
+          //     data[i+1] = blue;
+          //     data[i+1] = alpha; 
+          // }
+          // imageData.data = data;
+          // maskCtx.putImageData(imageData,0,   0);
+          //   maskCtx.drawImage(imageData,10,10);
     });
 
 
