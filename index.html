@@ -8,7 +8,9 @@
     <script src="processing/processing.js" type="text/javascript"></script>
     <script type="text/javascript">
 // convenience function to get the id attribute of generated sketch html element
-function getProcessingSketchId () { return 'testImageJS'; }
+// function getProcessingSketchId () { return 'testImageJS'; }
+
+
 </script>
 <script type="text/javascript">
 			//var socket = io.connect('http://ec2-54-221-90-69.compute-1.amazonaws.com:8080/');
@@ -26,30 +28,39 @@ function getProcessingSketchId () { return 'testImageJS'; }
                 console.log('flow in the browser');
             });
 
+            function map_range(value, low1, high1, low2, high2) {
+                return low2 + (high2 - low2) * (value - low1) / (high1 - low1);
+            }
 
 
             function main() {
 
-               var zoneSize = 8,
-               videoElement = document.getElementById('thevideo'),
-               videoWidth = videoElement.videoWidth,
-               videoHeight = videoElement.videoHeight;
-               webCamFlow = new oflow.WebCamFlow(videoElement, zoneSize),
-               canvas = document.getElementById('scene'),
-               ballCanvas = document.getElementById('ballScene'),
-               sceneCtx = canvas.getContext('2d'),
-               ballCtx = ballCanvas.getContext('2d'),
-               sceneWidth = canvas.width,
-               sceneHeight = canvas.height,
-               ballSceneW = ballScene.width,
-               ballSceneH = ballScene.height,
-               ballX = ballSceneW / 2,
-               ballY = ballSceneH / 2;
+             var zoneSize = 16    ,
+             videoElement = document.getElementById('thevideo'),
+             videoWidth = videoElement.videoWidth,
+             videoHeight = videoElement.videoHeight,
 
-               ballCtx.fillStyle = '#bada55';
-            // )
-webCamFlow.onCalculated( function (direciton) {
+             webCamFlow = new oflow.WebCamFlow(videoElement, zoneSize),
+             canvas = document.getElementById('scene'),
+             ballCanvas = document.getElementById('ballScene'),
+             maskCanvas = document.getElementById('maskScene'),
+             sceneCtx = canvas.getContext('2d'),
+             ballCtx = ballCanvas.getContext('2d'),
+             maskCtx = maskCanvas.getContext('2d'),
+             sceneWidth = canvas.width,
+             sceneHeight = canvas.height,
+             ballSceneW = ballScene.width,
+             ballSceneH = ballScene.height,
+             maskSceneW = maskScene.width,
+             maskSceneH = maskScene.height,
+             ballX = ballSceneW / 2,
+             ballY = ballSceneH / 2;
+
+             ballCtx.fillStyle = '#bada55';
+             webCamFlow.onCalculated( function (direciton) {
             // render zones
+            
+            maskTest = direciton;
             socket.emit('flowData',direciton);
             sceneCtx.clearRect(0, 0, sceneWidth, sceneHeight);
             for(var i = 0; i < direciton.zones.length; ++i) {
@@ -75,7 +86,28 @@ webCamFlow.onCalculated( function (direciton) {
             ballCtx.fillStyle = 'yellow';
             ballCtx.fill();
             ballCtx.stroke(); 
-        });
+
+
+
+            var imageData = maskCtx.getImageData(0, 0, maskSceneW, maskSceneH);
+            var data = imageData.data;
+
+        // iterate over all pixels
+        for(var i = 0, n = data.length; i < n; i += 4) {
+          var red = 255 - data[i];
+          var green = 255- data[i + 1];
+          var blue = 255- data[i + 2];
+          var alpha = data[i + 3];
+
+          data[i] = red;
+          data[i+1] = green; 
+      }
+      imageData.data = data;
+      maskCtx.putImageData(imageData,0,   0);
+        // maskCtx.drawImage(imageData,10,10);
+    });
+
+
 
 webCamFlow.startCapture();
 }	
@@ -85,14 +117,28 @@ webCamFlow.startCapture();
 <body onload="main();">
   <img src="" id="imagefile">
   <div style='float:left'>
-   Video: <video id="thevideo" width="320" height="240" autoplay></video>
-   Canvas: <canvas id="ballScene" width="320" height="240"></canvas>
-                <canvas id="testImageJS" data-processing-sources="processing/testImageJS.pde" 
-                        width="640" height="360">
-                    <p>Your browser does not support the canvas tag.</p>
-                    <!-- Note: you can put any alternative content here. -->
-                </canvas>
-</div>
+     Video: <video id="thevideo" width="320" height="240" autoplay></video>
+     Canvas: <canvas id="ballScene" width="320" height="240"></canvas>
+     Mask Canvas: <canvas id="maskScene" width="320"  height="240" ></canvas>
+     <script >
+
+     var maskC = document.getElementById('maskScene');
+     console.log(maskC);
+      var maskContext = maskC.getContext('2d');
+     var imageObj = new Image();
+     imageObj.onload = function() {
+
+        maskContext.drawImage(imageObj, 0, 0);
+    };
+
+    imageObj.src = 'http://localhost:8080/moonwalk.jpg';   
+
+    </script>
+
+
+</div>        
+
+
 <canvas id='scene' width='640px' height='480px'></canvas>
 
 
