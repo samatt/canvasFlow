@@ -78,7 +78,7 @@ io.sockets.on('connection',
 		for (var m = 0; m < messages.length; m++) {
 			socket.send(messages[m]);
 		}
-
+		console.log(users);
 		// socket.on('connect',
 		// When this user "send" from clientside javascript, we get a "message"
 		// client side: socket.send("the message");  or socket.emit('message', "the message");
@@ -107,12 +107,25 @@ io.sockets.on('connection',
 			// console.log("Received: 'flowData' ");
 			// console.log(data);
 			//,{data: data,id: socket.id}
-			// io.sockets.emit('flowData',{data: data,id: socket.id});
+			io.sockets.emit('flowData',{data: data,id: socket.id});
 			// socket.broadcast.emit('flowData',{data: data,id: socket.id});
 		});	
 		
 		socket.on('disconnect', function() {
 			console.log("Client has disconnected");
+			var i=users.indexOf(socket.id) ;
+			console.log("Removing user:" +users[i]);
+			users.splice(i,1);
+			console.log(users);
+			// for (var i =users.length; i>=0 ;i--) {
+			// 	if(users[i] == socket.id){
+			// 		console.log("Removing user:" +users[i]);
+			// 		users.splice(i,1);
+			// 		if(i==0){
+			// 		  users[i] = "xx";
+			// 		}
+			// 	}
+			// }
 		});
 	}
 	);
