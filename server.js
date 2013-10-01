@@ -60,6 +60,8 @@ function contentType(ext) {
 // WebSocket Portion
 // WebSockets work with the HTTP server
 var io = require('socket.io').listen(httpServer);
+var users = new Array();
+var messages = new Array();
 
 // Register a callback function to run when we have an individual connection
 // This is run for each individual user that connects
@@ -68,7 +70,16 @@ io.sockets.on('connection',
 	function (socket) {
 
 		console.log("We have a new client: " + socket.id);
+	
+		
+		var userindex = users.length;
+		users[userindex] = socket.id;
+		
+		for (var m = 0; m < messages.length; m++) {
+			socket.send(messages[m]);
+		}
 
+		// socket.on('connect',
 		// When this user "send" from clientside javascript, we get a "message"
 		// client side: socket.send("the message");  or socket.emit('message', "the message");
 		socket.on('message', 
@@ -82,8 +93,7 @@ io.sockets.on('connection',
 				
 				// To all clients, on io.sockets instead
 				// io.sockets.emit('message', "this goes to everyone");
-			}
-			);
+		});
 		
 		// When this user emits, client side: socket.emit('otherevent',some data);
 		socket.on('image', function(data) {
@@ -94,8 +104,11 @@ io.sockets.on('connection',
 		
 		socket.on('flowData',function(data){
 			console.log("Received: 'flowData' ");
-			console.log(data);
-		})
+			// console.log(data);
+			//,{data: data,id: socket.id}
+			io.sockets.emit('flowData',{data: data,id: socket.id});
+			// socket.broadcast.emit('flowData',{data: data,id: socket.id});
+		});	
 		
 		socket.on('disconnect', function() {
 			console.log("Client has disconnected");

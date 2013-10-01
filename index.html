@@ -4,29 +4,55 @@
     <script type="text/javascript" src="js/oflow.js"> </script> 
     <script type="text/javascript" src="js/colors.js"> </script> 
     <script src="socket.io/socket.io.js"> </script>
-
-    <script src="processing/processing.js" type="text/javascript"></script>
     <script type="text/javascript">
-// convenience function to get the id attribute of generated sketch html element
-// function getProcessingSketchId () { return 'testImageJS'; }
-
-
-</script>
-<script type="text/javascript">
 			//var socket = io.connect('http://ec2-54-221-90-69.compute-1.amazonaws.com:8080/');
 			var socket = io.connect('http://localhost:8080/');
-			socket.on('connect', function() {
+			
+            socket.on('connect', function (data) {
 				console.log("Connected");
+                console.log("User index: " + data);
+
 			});
 
 			socket.on('image', function (data) {
                 console.log("Got image");
+
                 document.getElementById('imagefile').src = data;
             });
 
-            socket.on('flowData',function(data){
-                console.log('flow in the browser');
-            });
+            socket.on('flowData',function (data){
+                console.log(data);
+                var flowData = data.data.zones;
+
+                var maskCanvas = document.getElementById('maskScene'),
+                 maskCtx = maskCanvas.getContext('2d'),
+                 maskSceneW = maskScene.width,
+                 maskSceneH = maskScene.height;
+                 
+            for(var i = 0; i <flowData.length; ++i) {
+                var zone = flowData[i];
+                var mag = calculateAlphaMag(flowData[i]);
+                // console.log(mag);
+                var imageData = maskCtx.getImageData(flowData[i].x, flowData[i].y, 16, 16);
+                var colorData = imageData.data;
+                // var color = getDirectionalColor(data.zones[i].u, flowData[i].v);
+                for(var j = 0, n = colorData.length; j < n; j += 4) {
+                // var red =  255-map_range(mag,0,20,10,data[j]+50);//map_range(mag,0,30,0,255);
+                // var green =  255 -map_range(mag,0,20,10,data[j+1]+50);
+                // var blue = 255-map_range(mag,0,20,10,data[j+2]+50);
+                // console.log(map_range(mag,0,15,10,data[j+3]);//" "+data[j+3] +" "+ mag);
+                var alpha =255-map_range(mag,0,20,10,colorData[j+3]);//data[j+3];
+                // data[j] = red; 
+                // data[j+1] = green;   
+                // data[j+2] = blue;
+                colorData[j+3] = alpha; 
+
+                }
+                imageData.data = colorData;
+                maskCtx.putImageData(imageData,zone.x , zone.y);
+                // console.log('flow in the browser');
+            }
+        });
 
             function map_range(value, low1, high1, low2, high2) {
                 return low2 + (high2 - low2) * (value - low1) / (high1 - low1);
@@ -66,6 +92,7 @@
             maskTest = direciton;
             socket.emit('flowData',direciton);
             sceneCtx.clearRect(0, 0, sceneWidth, sceneHeight);
+/*            
             for(var i = 0; i < direciton.zones.length; ++i) {
                 var zone = direciton.zones[i];
                 sceneCtx.strokeStyle = getDirectionalColor(zone.u, zone.v);
@@ -86,14 +113,14 @@
                 // console.log("first : " + j);
                 // var green = map_range(mag,0,20,0,255);
                 // var red =  255-map_range(mag,0,20,10,data[j]+50);//map_range(mag,0,30,0,255);
-                var green =  255 -map_range(mag,0,20,10,data[j+1]+50);
+                // var green =  255 -map_range(mag,0,20,10,data[j+1]+50);
                 // var blue = 255-map_range(mag,0,20,10,data[j+2]+50);
                 // console.log(map_range(mag,0,15,10,data[j+3]);//" "+data[j+3] +" "+ mag);
-                // var alpha =255-map_range(mag,0,20,10,data[j+3]);//data[j+3];
+                var alpha =255-map_range(mag,0,20,10,data[j+3]);//data[j+3];
                 // data[j] = red; 
-                data[j+1] = green;   
+                // data[j+1] = green;   
                 // data[j+2] = blue;
-                // data[j+3] = alpha; 
+                data[j+3] = alpha; 
                 // data[j] = color[0]; 
                 // data[j+1] = color[1];   
                 // data[j+2] = color[2];
@@ -108,17 +135,8 @@
                 }
                 imageData.data = data;
                 maskCtx.putImageData(imageData,zone.x , zone.y);
-                
-                // maskCtx.clearRect(0, 0, maskSceneW, maskSceneH);
-                // maskCtx.beginPath();
-                // maskCtx.arc(zone.x,zone.y,5,0,2 * Math.PI, false);
-                // maskCtx.fillStyle = "blue";//getDirectionalColor(zone.u, zone.v);
-                // maskCtx.fill();
-                // maskCtx.stroke();
-                // maskCtx.endPath();
-                
             }
-
+*/
             // for(var i = 0; i < direciton.zones.length; ++i) {
             //     var zone = direciton.zones[i];
                 
