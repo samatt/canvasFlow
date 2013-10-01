@@ -89,7 +89,8 @@ io.sockets.on('connection',
 				
 				// Call "broadcast" to send it to all clients (except sender), this is equal to
 				// socket.broadcast.emit('message', data);
-				socket.broadcast.send(data);
+				// socket.broadcast.send(data);
+				io.sockets.emit('ids',users);
 				
 				// To all clients, on io.sockets instead
 				// io.sockets.emit('message', "this goes to everyone");
@@ -103,10 +104,10 @@ io.sockets.on('connection',
 		});
 		
 		socket.on('flowData',function(data){
-			console.log("Received: 'flowData' ");
+			// console.log("Received: 'flowData' ");
 			// console.log(data);
 			//,{data: data,id: socket.id}
-			io.sockets.emit('flowData',{data: data,id: socket.id});
+			// io.sockets.emit('flowData',{data: data,id: socket.id});
 			// socket.broadcast.emit('flowData',{data: data,id: socket.id});
 		});	
 		
