@@ -10,7 +10,7 @@
     			var myID;
                 var users = new Array();
                 socket.on('connect', function (data) {
-    				console.log("Connected");
+    				// console.log("Connected");
                     // console.log("User index: " + data);
                                 
     			});
@@ -23,15 +23,16 @@
                });
     			
                 socket.on('ids', function (data) {
-                     var parent=document.getElementById("body");
+                     var parent=document.getElementById("container");
+                    // for (var m = 0; m < 9; m++) {
                     for (var m = 0; m < data.length; m++) {
                         console.log("ID: "+m+" "+ data[m]);
-                        if(! document.getElementById(data[m])){
+                        if(! document.getElementById(data[m]) &&data[m]){
                             // parent.addChild('canvas');
                             var c = document.createElement('canvas');
                             
                             var id = document.createAttribute('id');
-                            id.value = data[m].toString();
+                            id.value = data[m];
                             
                             var width = document.createAttribute('width');
                             var height = document.createAttribute('height');
@@ -44,7 +45,7 @@
                             c.setAttributeNode(height);
                             parent.appendChild(c);
 
-                            loadCanvas(id.value);
+                            loadCanvas(id.value , m);
                             
                         }
                         
@@ -56,7 +57,7 @@
                      // console.log(data);
                     var flowData = data.data.zones;
                      var id =   data.id;
-                     console.log(id);
+                     // console.log(id);
                      
                     if(document.getElementById(id)){
                     var maskCanvas = document.getElementById(id),
@@ -70,12 +71,11 @@
                     // console.log(mag);
                     var imageData = maskCtx.getImageData(flowData[i].x, flowData[i].y, 16, 16);
                     var colorData = imageData.data;
-                    // var color = getDirectionalColor(data.zones[i].u, flowData[i].v);
-                        for(var j = 0, n = colorData.length; j < n; j += 4) {
+                    
+                    for(var j = 0, n = colorData.length; j < n; j += 4) {
                         // var red =  255-map_range(mag,0,20,10,data[j]+50);//map_range(mag,0,30,0,255);
                         // var green =  255 -map_range(mag,0,20,10,data[j+1]+50);
                         // var blue = 255-map_range(mag,0,20,10,data[j+2]+50);
-                        // console.log(map_range(mag,0,15,10,data[j+3]);//" "+data[j+3] +" "+ mag);
                         var alpha =255-map_range(mag,0,20,10,colorData[j+3]);//data[j+3];
                         // data[j] = red; 
                         // data[j+1] = green;   
@@ -86,7 +86,7 @@
                         imageData.data = colorData;
                         maskCtx.putImageData(imageData,zone.x , zone.y);
                         // console.log('flow in the browser');
-                        }
+                    }
                     }else{
 
                      var maskCanvas = document.getElementById('maskScene'),
@@ -121,7 +121,7 @@
                     }
                 });
 
-                function loadCanvas(id){
+                function loadCanvas(id, index){
                      var maskC = document.getElementById(id);
                         console.log(maskC);
                     var maskContext = maskC.getContext('2d');
@@ -130,7 +130,7 @@
 
                     maskContext.drawImage(imageObj, 0, 0);
                     }
-                imageObj.src = 'http://localhost:8080/moonwalk.jpg';   
+                imageObj.src = 'http://localhost:8080/'+(index+1)+'.png';   
                 }
                 function map_range(value, low1, high1, low2, high2) {
                     return low2 + (high2 - low2) * (value - low1) / (high1 - low1);
@@ -148,24 +148,8 @@
                  videoHeight = videoElement.videoHeight,
 
                  webCamFlow = new oflow.WebCamFlow(videoElement, zoneSize);
-                 // canvas = document.getElementById('scene'),
-                 // ballCanvas = document.getElementById('ballScene'),
-                 // maskCanvas = document.getElementById('maskScene'),
-                 // sceneCtx = canvas.getContext('2d'),
-                 // ballCtx = ballCanvas.getContext('2d'),
-                 // maskCtx = maskCanvas.getContext('2d'),
-                 // sceneWidth = canvas.width,
-                 // sceneHeight = canvas.height,
-                 // ballSceneW = ballScene.width,
-                 // ballSceneH = ballScene.height,
-                 // maskSceneW = maskScene.width,
-                 // maskSceneH = maskScene.height,
-                 // ballX = ballSceneW / 2,
-                 // ballY = ballSceneH / 2;
-
-                 // ballCtx.fillStyle = '#bada55';
                  webCamFlow.onCalculated( function (direciton) {
-                // render zones
+                
                 
                 socket.emit('flowData',direciton);
                 
@@ -181,14 +165,14 @@
     </head>
     <body id='body' onload="main();">
       <!-- <img src="" id="imagefile"> -->
-      <!-- <div id = 'container'style='float:left'> -->
+      <div id = 'container'style='float:left'>
          Video: <video id="thevideo" width="320" height="240" autoplay></video>
          Canvas: <canvas id="ballScene" width="320" height="240"></canvas>
          Mask Canvas: <canvas id="maskScene" width="320"  height="240" ></canvas>
          <script >
 
          var maskC = document.getElementById('maskScene');
-         console.log(maskC);
+         // console.log(maskC);
           var maskContext = maskC.getContext('2d');
          var imageObj = new Image();
          imageObj.onload = function() {
@@ -201,7 +185,7 @@
         </script>
 
 
-    <!-- </div>         -->
+    </div>        
 
 
     <canvas id='scene' width='640px' height='480px'></canvas>
